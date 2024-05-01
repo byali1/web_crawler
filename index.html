@@ -14,29 +14,9 @@
     <button class="btn btn-dark" onclick="fetchData()">Ara</button>
     <div id="result"></div>
 
-
-
-
-
-
-
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-    <script>
-        function fetchData() {
-            var searchTerm = document.getElementById("searchInput").value;
-            fetch(`http://localhost:3000/search?q=${encodeURIComponent(searchTerm)}`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('result').innerHTML = 'Veri başarıyla çekildi. İşlenen veriler: <br>' + html;
-                })
-                .catch(error => {
-                    console.error('Hata:', error);
-                    document.getElementById('result').textContent = 'Hata oluştu: ' + error.message;
-                });
-        }
-    </script>
+  <script src="app.js"></script>
 </body>
 
 </html>
