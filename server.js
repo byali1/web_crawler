@@ -39,7 +39,29 @@ app.get('/search', async (req, res) => {
         const href = firstAnchor.getAttribute('href').trim();
         const title = firstAnchor.getAttribute('title').trim();
 
-        res.json({ href, title });
+        // href değerinden sayfaya istek yaparak ilgili fiyat ve ürün adı bilgilerini al
+        const pageResponse = await axios.get(href, axiosConfig);
+        const pageDom = new JSDOM(pageResponse.data);
+        const productDetailsUl = pageDom.window.document.querySelector('ul#PL.pl_v9.pg_v9');
+        if (!productDetailsUl) {
+            throw new Error('Ürün detayları bulunamadı');
+        }
+
+        const productLis = productDetailsUl.querySelectorAll('li');
+        const productInfos = [];
+        productLis.forEach(li => {
+            const priceSpan = li.querySelector('span.pt_v8');
+            const productNameSpan = li.querySelector('span.w_v8 span.pn_v8');
+            const sellerSpan = li.querySelector('span.v_v8');
+            if (priceSpan && productNameSpan && sellerSpan) {
+                const price = priceSpan.textContent.trim();
+                const productName = productNameSpan.textContent.trim();
+                const sellerHTML = sellerSpan.innerHTML.trim();
+                productInfos.push({ price, productName, seller: sellerHTML });
+            }
+        });
+
+        res.json({ href, title, productInfos });
     } catch (error) {
         console.error('Akakce verisi getirilirken hata oluştu:', error);
         res.status(500).send('Sunucu hatası: ' + error.message);

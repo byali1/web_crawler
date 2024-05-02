@@ -1,0 +1,13 @@
+Projenin kritik noktaları ve kod parçaları:
+
+CORS (Cross-Origin Resource Sharing): Web tarayıcıları, güvenlik nedenleriyle farklı bir etki alanından (origin) gelen HTTP isteklerini engeller. Bu, tarayıcının aynı zamanda JavaScript kodunun etki alanı dışındaki kaynaklara erişimini sınırlar. Bu nedenle, tarayıcıdan farklı bir etki alanındaki bir API'ye doğrudan istek yapmak mümkün değildir. Bu sorunu çözmek için, CORS politikalarını kullanarak sunucular belirli etki alanlarından gelen isteklere izin verebilirler.
+
+Proxy Sunucu: CORS politikalarını atlatmanın bir yolu, istekleri sunucu tarafında başka bir sunucuya yönlendiren bir proxy sunucusu kullanmaktır. Bu, isteklerin tarayıcıdan doğrudan hedef sunucuya gitmesini engeller ve böylece CORS engelini aşar.
+
+User-Agent ve Referer: Bazı web siteleri isteklerin kaynağını denetler ve isteklerin tarayıcı tarafından yapılmış gibi görünmesini ister. Bu nedenle, isteklere uygun bir User-Agent ve Referer başlığı eklemek önemlidir. User-Agent, isteği yapan kullanıcı ajanını tanımlar. Referer, isteğin kaynak sayfasını belirtir.
+Axios Config: axios kütüphanesi kullanılarak yapılan HTTP isteklerinin yapılandırılmasını sağlar. Bu durumda, isteklerin kullanıcı ajanı ve kaynak sayfa bilgileri eklenerek, isteklerin bir tarayıcıdan geldiği gibi görünmesi sağlanır.
+
+JSDOM Kullanımı: JSDOM, Node.js ortamında bir DOM sunar. Bu, gelen HTML yanıtını parse etmek ve ardından DOM manipülasyonları yapmak için kullanılır. Bu örnekte, Akakçe web sitesinden gelen HTML yanıtını parse etmek için JSDOM kullanılır.
+DOM Manipülasyonu: querySelector ve querySelectorAll gibi DOM yöntemleri kullanılarak HTML içinde gezinilir ve istenilen elementler bulunur. Bu örnekte, ul#APL.pl_v9.qv_v9 elementi ve içindeki h3.pn_v8 elementi seçilir.
+
+Hata İşleme: İstek sırasında oluşabilecek hatalar ele alınır ve uygun hata mesajları ile istemciye döndürülür.
