@@ -1,61 +1,85 @@
-// app.js
+document.getElementById('searchForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const query = document.getElementById('query').value;
+    fetchContent(query);
+});
 
-async function fetchData() {
+async function fetchContent(query) {
+    const url = `https://www.fidanburada.com/arama?q=${query}`;
+    const proxyUrl = `http://localhost:3000/proxy?url=${encodeURIComponent(url)}`;
     try {
-        var searchTerm = document.getElementById("searchInput").value;
-        const response = await fetch(`http://localhost:3000/search?q=${encodeURIComponent(searchTerm)}`);
-        const data = await response.json();
-        renderProductDetails(data);
-    } catch (error) {
-        console.error('Veri getirilirken bir hata oluştu:', error);
-    }
-}
-
-function renderProductDetails(data) {
-    const productDetailsDiv = document.getElementById('productDetails');
-    productDetailsDiv.innerHTML = `
-        <a class="fs-5 text-dark" href="${data.href}" target="_blank">${data.title}</a>
-
-        <table class="table table-striped mt-3">
-            <thead>
-                <tr>
-                    <th scope="col">Fiyat</th>
-                    <th scope="col">Ürün Adı</th>
-                    <th scope="col">Satıcı</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${data.productInfos.map(info => `
-                <tr>
-                    <td class="text-success">${info.price}</td>
-                    <td class="text-dark">${info.productName}</td>
-                    <td>${getSeller(info.seller)}</td>
-                </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-
-
-function getSeller(sellerHTML) {
-    const sellerSpan = document.createElement('span');
-    sellerSpan.innerHTML = sellerHTML;
-    const rcElement = sellerSpan.querySelector('.rc_v8');
-    if (rcElement) {
-        return '';
-    } else {
-        const imgElement = sellerSpan.querySelector('img');
-        if (imgElement) {
-            const altText = imgElement.getAttribute('alt') || '';
-            const sellerText = sellerSpan.textContent.trim().replace(altText, '').trim();
-            return `<span class="fw-bold">${altText}</span>${sellerText}`;
-        } else {
-            return sellerSpan.textContent.trim();
+        const response = await fetch(proxyUrl);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
+        const text = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
+        const resultsDiv = document.getElementById('fidan-burada-result');
+        resultsDiv.innerHTML = '';
+
+        const catalogElement = doc.querySelector('#catalog335');
+        if (catalogElement) {
+            // 3 kere içeri gir ve <a> elemanını bul
+            let currentElement = catalogElement;
+            for (let i = 0; i < 3; i++) {
+                if (currentElement.children.length > 0) {
+                    currentElement = currentElement.children[0];
+                } else {
+                    resultsDiv.textContent = 'Sonuç bulunamadı.';
+                    return;
+                }
+            }
+
+            const anchorElement = currentElement.querySelector('a');
+            if (anchorElement) {
+                const fullUrl = `https://www.fidanburada.com${anchorElement.getAttribute('href')}`;
+                resultsDiv.textContent = fullUrl;
+
+                // Yeni sayfadan istenilen içeriği al
+                fetchNewPageContent(fullUrl);
+            } else {
+                resultsDiv.textContent = 'Sonuç bulunamadı.';
+            }
+        } else {
+            resultsDiv.textContent = 'Element mevcut değil.';
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        document.getElementById('fidan-burada-result').textContent = 'Bir hata oluştu.';
     }
 }
 
+async function fetchNewPageContent(url) {
+    const proxyUrl = `http://localhost:3000/proxy?url=${encodeURIComponent(url)}`;
+    try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const text = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
+        const resultsDiv = document.getElementById('fidan-burada-result');
 
-
-
+        const trElement = doc.querySelector('tr[style="height: 53px;"]');
+        if (trElement) {
+            const tdElement = trElement.querySelector('td');
+            if (tdElement) {
+                // İlk span elementini kaldır
+                const firstSpan = tdElement.querySelector('span');
+                if (firstSpan) {
+                    firstSpan.remove();
+                }
+                resultsDiv.innerHTML = tdElement.innerHTML; // İçeriği HTML olarak ekle
+            } else {
+                resultsDiv.textContent = 'TD element bulunamadı.';
+            }
+        } else {
+            resultsDiv.textContent = 'TR element bulunamadı.';
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        document.getElementById('results').textContent = 'Bir hata oluştu.';
+    }
+}

@@ -1,19 +1,10 @@
 {
-  "name": "web_crawler",
+  "name": "proxy-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "main": "proxy.js",
+  "type": "module",
   "dependencies": {
-    "axios": "^1.6.8",
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "jsdom": "^24.0.0",
-    "request": "^2.88.2"
+    "express": "^4.17.1",
+    "node-fetch": "^3.0.0"
   }
 }

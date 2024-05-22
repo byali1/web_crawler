@@ -8,17 +8,25 @@ app.use(cors());
 
 app.get('/search', async (req, res) => {
     const searchTerm = req.query.q;
-    const url = `https://www.akakce.com/arama/?q=${encodeURIComponent(searchTerm)}`;
+    const url = `https://www.fidanburada.com/arama/?q=${encodeURIComponent(searchTerm)}`;
 
     const axiosConfig = {
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-            'Referer': 'https://www.akakce.com/'
+            'Referer': 'https://www.fidanburada.com/'
         }
     };
 
+    console.log('Requesting URL:', url);
+
     try {
         const response = await axios.get(url, axiosConfig);
+        console.log('Response status:', response.status);
+
+        if (response.status === 404) {
+            throw new Error('URL not found (404)');
+        }
+
         const dom = new JSDOM(response.data);
         const ulElement = dom.window.document.querySelector('ul#APL.pl_v9.qv_v9');
 
@@ -39,7 +47,6 @@ app.get('/search', async (req, res) => {
         const href = firstAnchor.getAttribute('href').trim();
         const title = firstAnchor.getAttribute('title').trim();
 
-        // href değerinden sayfaya istek yaparak ilgili fiyat ve ürün adı bilgilerini al
         const pageResponse = await axios.get(href, axiosConfig);
         const pageDom = new JSDOM(pageResponse.data);
         const productDetailsUl = pageDom.window.document.querySelector('ul#PL.pl_v9.pg_v9');
@@ -62,8 +69,9 @@ app.get('/search', async (req, res) => {
         });
 
         res.json({ href, title, productInfos });
+
     } catch (error) {
-        console.error('Akakce verisi getirilirken hata oluştu:', error);
+        console.error('Veri getirilirken hata oluştu:', error.message);
         res.status(500).send('Sunucu hatası: ' + error.message);
     }
 });
